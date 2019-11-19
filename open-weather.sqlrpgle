@@ -22,6 +22,7 @@ end-ds;
 // Extracted weather data.
 dcl-ds json_data_t qualified template inz;
   city varchar(128);
+  temp packed(5: 2);
   id int(10);
   main varchar(128);
   desc varchar(1024);
@@ -47,7 +48,8 @@ dcl-proc main;
     // json_data.city
     // json_data.main
 
-    message = 'The weather in ' + json_data.city + ' is ' + json_data.main + '!';
+    message = 'The weather in ' + json_data.city + ' is ' +
+              %char(json_data.temp) + ' degrees centigrade and ' + json_data.main + '!';
 
   enddo;
 
@@ -77,11 +79,12 @@ dcl-proc OpenWeatherApi;
     );
   CheckSqlState(SQLSTT);
 
-  // Create and open a cursor to parse the JSON repsonse.
+  // Create and open a cursor to parse the JSON response.
   exec sql
     declare JSON_CURSOR cursor for
 
     select coalesce(CITY, ''),
+           coalesce(TEMP, 0),
            coalesce(WEATHER_ID, 0),
            coalesce(MAIN, ''),
            coalesce(DESC, '')
@@ -91,6 +94,7 @@ dcl-proc OpenWeatherApi;
       'lax $.list[*]'   -- Occurs once per city
       columns(
         CITY varchar(50) path '$.name',
+        TEMP dec(5, 2) path '$.main.temp',
         nested path 'lax $.weather[*]' -- Occurs 1 or more times for each city
         columns(
           WEATHER_ID integer path '$.id',
@@ -148,7 +152,7 @@ dcl-proc CheckSqlState;
       dsply 'Error!';
       // Force a stupid error in lieu of sending an proper exception...
       x = x / x;
-      return SQL_EOF;
+      return SQL_NOT_EOF;
 
   endsl;
 
