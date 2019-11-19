@@ -1,6 +1,6 @@
 **FREE
 //**************************************************************************************************************
-// Basic example of calling a JSON webservice using embedded RPG.
+// Basic example of calling a JSON webservice using embedded SQL.
 //  The example API is from OpenWeather and can be found here https://openweathermap.org/current#severalid
 //**************************************************************************************************************
 ctl-opt copyright('')
