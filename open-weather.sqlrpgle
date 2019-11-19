@@ -148,7 +148,7 @@ dcl-proc CheckSqlState;
       dsply 'Error!';
       // Force a stupid error in lieu of sending an proper exception...
       x = x / x;
-      return SQL_NOT_EOF;
+      return SQL_EOF;
 
   endsl;
 
