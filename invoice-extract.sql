@@ -1,4 +1,5 @@
 
+-- Create a test JSON row in a temporary file.
 declare global temporary table JSON_INVOICES as (
   select cast(J_DATA as clob(10K)) as J_DATA
   from(values(
@@ -8,6 +9,7 @@ declare global temporary table JSON_INVOICES as (
       "invoiceNumber": 2019001,
       "customer": 1,
       "address": "Somewhere in Wiesbaden, Germany",
+      "email": "test@test.com",
       "items": [
         {
           "lineNum": 1,
@@ -57,34 +59,36 @@ declare global temporary table JSON_INVOICES as (
 
 -- Extract invoice header data.
 declare global temporary table INVOICE_HEADER as (
-  select INVOICE_NUMBER,
-         CUSTOMER,
-         ADDRESS
+  select J.INVOICE_NUMBER,
+         J.CUSTOMER,
+         J.ADDRESS,
+         J.EMAIL
 
-  from QTEMP.JSON_INVOICES
+  from QTEMP.JSON_INVOICES JI
 
   cross join json_table(
-    J_DATA,
+    JI.J_DATA,
     'strict $.invoices[*]' -- Extract all elements of "invoices" array
     columns(
       INVOICE_NUMBER int path 'strict $.invoiceNumber',
       CUSTOMER int path 'strict $.customer',
-      ADDRESS varchar(256) path 'strict $.address'
+      ADDRESS varchar(256) path 'strict $.address',
+      EMAIL varchar(256) path 'lax $.email' default '' on empty
     )
-  ) X
+  ) J
 ) with data with replace;;
 
 -- Extract invoice line data.
 declare global temporary table INVOICE_LINE as (
-  select INVOICE_NUMBER,
-         LINE_NUM,
-         ITEM,
-         PRICE
+  select J.INVOICE_NUMBER,
+         J.LINE_NUM,
+         J.ITEM,
+         J.PRICE
 
-  from QTEMP.JSON_INVOICES
+  from QTEMP.JSON_INVOICES JI
 
   cross join json_table( 
-    J_DATA,
+    JI.J_DATA,
     '$.invoices[*]'
     columns(
       INVOICE_NUMBER integer path '$.invoiceNumber',
@@ -95,20 +99,20 @@ declare global temporary table INVOICE_LINE as (
           PRICE decimal(10, 2) path '$.price'
         ) 
     )
-  ) X
+  ) J
 ) with data with replace
 ;;
 
 -- Extract invoice discount code data.
 declare global temporary table INVOICE_DISCOUNT as (
-  select INVOICE_NUMBER,
-         LINE_NUM,
-         DISCOUNT_CODE
+  select J.INVOICE_NUMBER,
+         J.LINE_NUM,
+         J.DISCOUNT_CODE
 
-  from QTEMP.JSON_INVOICES
+  from QTEMP.JSON_INVOICES JI
 
   cross join json_table(
-    J_DATA,
+    JI.J_DATA,
     '$.invoices[*]'
     columns(
       INVOICE_NUMBER integer path '$.invoiceNumber',
@@ -121,11 +125,10 @@ declare global temporary table INVOICE_DISCOUNT as (
           ) 
         ) 
     )
-  ) X
+  ) J
 
   where DISCOUNT_CODE is not null
-) with data with replace
-  
+) with data with replace  
 ;;
 
 -- Join up the files to show the results...
@@ -139,3 +142,4 @@ join QTEMP.INVOICE_LINE L
 left join QTEMP.INVOICE_DISCOUNT D
   on D.INVOICE_NUMBER = L.INVOICE_NUMBER and
      D.LINE_NUM = L.LINE_NUM
+;;
