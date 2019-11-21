@@ -10,7 +10,7 @@ declare global temporary table JSON_INVOICES as (
       "customer": 1,
       "address": "Somewhere in Wiesbaden, Germany",
       "email": "test@test.com",
-      "items": [
+      "lines": [
         {
           "lineNum": 1,
           "item": "SPARE_PART-1",
@@ -33,7 +33,7 @@ declare global temporary table JSON_INVOICES as (
       "invoiceNumber": 2019002,
       "customer": 2,
       "address": "Somewhere in Guildford, UK",
-      "items": [
+      "lines": [
         {
           "lineNum": 1,
           "item": "SPARE_PART-3",
@@ -93,7 +93,7 @@ declare global temporary table INVOICE_LINE as (
     '$.invoices[*]'
     columns(
       INVOICE_NUMBER integer path '$.invoiceNumber',
-      nested path '$.items[*]' -- Extract all "line" for all "invoices"
+      nested path '$.lines[*]' -- Extract all "lines" for all "invoices"
         columns(
           LINE_NUM integer path '$.lineNum',
           ITEM varchar(50) path '$.item',
@@ -118,7 +118,7 @@ declare global temporary table INVOICE_DISCOUNT as (
     '$.invoices[*]'
     columns(
       INVOICE_NUMBER integer path '$.invoiceNumber',
-      nested path '$.items[*]'
+      nested path '$.lines[*]'
         columns(
           LINE_NUM integer path '$.lineNum',
           nested path 'lax $.discountCodes[*]' -- Extract all "discounts" for all "lines" for all "invoices"
