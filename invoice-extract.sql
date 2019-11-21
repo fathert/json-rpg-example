@@ -83,6 +83,7 @@ declare global temporary table INVOICE_LINE as (
   select J.INVOICE_NUMBER,
          J.LINE_NUM,
          J.ITEM,
+         J.QUANTITY,
          J.PRICE
 
   from QTEMP.JSON_INVOICES JI
@@ -96,6 +97,7 @@ declare global temporary table INVOICE_LINE as (
         columns(
           LINE_NUM integer path '$.lineNum',
           ITEM varchar(50) path '$.item',
+          QUANTITY integer path '$.quantity',
           PRICE decimal(10, 2) path '$.price'
         ) 
     )
