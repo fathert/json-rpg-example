@@ -3,7 +3,7 @@
 -- NOTE: As yet untested with a functioning API key!
 declare global temporary table TEST_LONG_LAT as (
 
-    -- Encode the address as a URL query string as required by the API.
+  -- Encode the address as a URL query string as required by the API.
 	with QUERY_STRING as (
 	    select 'address=' concat 
 	        systools.urlencode(CITY, 'UTF-8') concat '+' concat 
@@ -18,7 +18,7 @@ declare global temporary table TEST_LONG_LAT as (
 	    ) x(CITY, POSTCODE, COUNTRY)
 	),
 	
-    -- Call the API for each address query above.
+  -- Call the API for each address query above.
 	LONG_LAT as (
 	  select systools.httpgetclob(
 	    varchar('https://maps.googleapis.com/maps/api/geocode/json?' concat QUERY_PARMS),
@@ -28,7 +28,7 @@ declare global temporary table TEST_LONG_LAT as (
 	  from QUERY_STRING
 	)
 	
-    -- Extract the error, latitude and longitude fields form the result.
+  -- Extract the error, latitude and longitude fields form the result.
 	select json_value(API_RESPONSE, '$.error_message' returning varchar(256)) as ERROR,
 	       json_value(API_RESPONSE, '$.results.geometry.location.lat' returning varchar(256)) as LATTITUDE,
 	       json_value(API_RESPONSE, '$.results.geometry.location.lng' returning varchar(256)) as LONGITUDE
