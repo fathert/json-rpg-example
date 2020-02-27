@@ -1,4 +1,11 @@
 
+--*************************************************************************************************
+-- Google Geo API Example
+-- Tim Fathers 2020
+--
+-- Uses the API documented here https://developers.google.com/maps/documentation/geocoding/intro
+--
+--*************************************************************************************************
 
 -- NOTE: As yet untested with a functioning API key!
 declare global temporary table TEST_LONG_LAT as (
@@ -11,6 +18,7 @@ declare global temporary table TEST_LONG_LAT as (
           systools.urlencode(COUNTRY, 'UTF-8') concat 
           '&key=[YOUR_API_KEY]' as QUERY_PARMS
       
+      -- Test data, replace with the real source data file.
       from(values
         ('Wiesbaden', '65185', 'Germany'),
         ('Frankfurt', '60311', 'Germany'),
@@ -30,8 +38,8 @@ declare global temporary table TEST_LONG_LAT as (
 
   -- Extract the error, latitude and longitude fields form the result.
   select json_value(API_RESPONSE, '$.error_message' returning varchar(256)) as ERROR,
-         json_value(API_RESPONSE, '$.results.geometry.location.lat' returning varchar(256)) as LATTITUDE,
-         json_value(API_RESPONSE, '$.results.geometry.location.lng' returning varchar(256)) as LONGITUDE
+          json_value(API_RESPONSE, '$.results.geometry.location.lat' returning varchar(256)) as LATTITUDE,
+          json_value(API_RESPONSE, '$.results.geometry.location.lng' returning varchar(256)) as LONGITUDE
 
   from LONG_LAT
 
