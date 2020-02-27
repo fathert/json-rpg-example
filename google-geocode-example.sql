@@ -30,8 +30,8 @@ declare global temporary table TEST_LONG_LAT as (
 
   -- Extract the error, latitude and longitude fields form the result.
   select json_value(API_RESPONSE, '$.error_message' returning varchar(256)) as ERROR,
-          json_value(API_RESPONSE, '$.results.geometry.location.lat' returning varchar(256)) as LATTITUDE,
-          json_value(API_RESPONSE, '$.results.geometry.location.lng' returning varchar(256)) as LONGITUDE
+         json_value(API_RESPONSE, '$.results.geometry.location.lat' returning varchar(256)) as LATTITUDE,
+         json_value(API_RESPONSE, '$.results.geometry.location.lng' returning varchar(256)) as LONGITUDE
 
   from LONG_LAT
 
